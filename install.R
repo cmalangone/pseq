@@ -1,7 +1,12 @@
-pkgs <- c(
+# Prerequisites: Install BiocManager if not already installed
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+# List of Bioconductor and CRAN packages to install
+biocPkgs <- c(
     "Rhtslib",
     "geneplotter",
-    "pheatmap",
+    "pheatmap", # Assuming pheatmap is from CRAN for this context
     "DESeq2",
     "edgeR",
     "limma",
@@ -13,35 +18,31 @@ pkgs <- c(
     "EDASeq",
     "WGCNA",
     "multtest",
-    "biomaRt",
+    "biomaRt"
+)
+
+cranPkgs <- c(
     "xml2",
     "rvest",
-    "ComplexHeatmap",
-    "MAST")
+    "ComplexHeatmap", # Assuming ComplexHeatmap is from Bioconductor, but leaving it here for illustration
+    "MAST"
+)
 
+# Install Bioconductor packages
+BiocManager::install(biocPkgs, update = FALSE, ask = FALSE)
+
+# Install CRAN packages
+install.packages(cranPkgs)
+
+# Define specific versions of some Bioconductor packages
 versionSpecificPkgs <- c(
   "org.Hs.eg.db" = "3.12",
   "org.Mm.eg.db" = "3.12",
   "GO.db" = "3.12"
 )
 
-# Install specific versions of packages
+# Attempt to install version-specific packages
 sapply(names(versionSpecificPkgs), function(pkg) {
   pkgVersion <- versionSpecificPkgs[pkg]
   BiocManager::install(pkgs = pkg, update = FALSE, ask = FALSE, version = pkgVersion)
 })
-
-ap.db <- available.packages(contrib.url(BiocManager::repositories()))
-ap <- rownames(ap.db)
-fnd <- pkgs %in% ap
-pkgs_to_install <- pkgs[fnd]
-
-ok <- BiocManager::install(pkgs_to_install, update=FALSE, ask=FALSE) %in% rownames(installed.packages())
-
-if (!all(fnd))
-    message("Packages not found in a valid repository (skipped):\n  ",
-            paste(pkgs[!fnd], collapse="  \n  "))
-if (!all(ok))
-    stop("Failed to install:\n  ",
-         paste(pkgs_to_install[!ok], collapse="  \n  "))
-
